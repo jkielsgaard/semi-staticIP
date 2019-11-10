@@ -6,7 +6,6 @@ from datetime import datetime
 
 # Getting and updating WANIP
 def APIPost(ip, url, key):
-        url = url
         data = json.dumps(ip)
         headers = {'content-type': 'application/json', 'x-api-key': '' + key + ''}
 
