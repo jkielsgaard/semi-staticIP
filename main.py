@@ -63,8 +63,8 @@ def Log(log, path):
 
 # Get file content
 def GetContent(fil):
-        fr = open(fil, "r").splitlines()
-        content = fr.read()
+        fr = open(fil, "r")
+        content = fr.read().splitlines()
         fr.close()
         return content[0]
 #####
