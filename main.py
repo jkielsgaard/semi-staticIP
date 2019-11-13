@@ -21,74 +21,95 @@ def GetWanIP():
         return  content
 
 def CheckWanIP(ip, fil):
-        fr = open(fil, "r")
-        content = fr.read()
-        fr.close()
-        if not (content == ip):
-                RewriteFile(ip, fil)
+        key = GetJsonData(fil, 'WanIP')
+
+        if not (key == ip):
+                UpdateWanIP(fil, ip)
+                return True
+        else:
+                return False
+###########################
+
+# Json Workers
+def CreateJsonFile(fil): 
+        data = { 'url': '', 'apikey': '', 'WanIP': '' }
+
+        with open(fil, 'w') as outfile:
+                json.dump(data, outfile)
+
+def GetJsonData(fil, key):
+        with open(fil) as json_file:
+                data = json.load(json_file)
+                return data[key]
+
+def UpdateWanIP(fil, ip):
+        with open(fil) as json_file:
+                data = json.load(json_file)
+        
+        Newdata = { 'url': data['url'], 'apikey': data['apikey'], 'WanIP': ip }
+
+        with open(fil, 'w') as outfile:
+                json.dump(Newdata, outfile)
+###########################
+
+
+# Check of create folder and files
+def CheckFolderExist(folder): 
+        if os.path.isdir(folder):
                 return True
         else:
                 return False
 
-def RewriteFile(ip, fil):
-        fw = open(fil,"w+")
-        fw.write(ip)
-        fw.close()
-#####
-
-# Check for folder and files
-def CheckFolderExist(folder):
-        if not os.path.isdir(folder):
-                os.mkdir(folder)
+def CreateFolder(folder):
+        os.mkdir(folder)
 
 def CheckFileExist(fil):
-        if not os.path.isfile(fil):
-                fw = open(fil,"w+")
-                fw.close()
-#####
+        if os.path.isfile(fil):
+                return True
+        else:
+                return False
+
+def CreateFile(fil):
+        os.mknod(fil)
+###########################
 
 # Creates logs
 def Log(log, path):
         path = "log"
-        CheckFolderExist(path)
-        now = datetime.now()
+        now  = datetime.now()
         date = now.strftime("%Y%m%d")
         time = now.strftime("%H:%M:%S")
+        
+        if not CheckFolderExist(path):
+                CreateFolder(path)
+
         fil = path + "/" + date + ".log"
-        CheckFileExist(fil)
+        if not CheckFileExist(fil):
+                CreateFile(fil)
+        
         fa = open(fil, "a+")
         fa.write(time + " - " + log + "\r\n")
         fa.close
-#####
-
-# Get file content
-def GetContent(fil):
-        fr = open(fil, "r")
-        content = fr.read().splitlines()
-        fr.close()
-        return content[0]
-#####
+###########################
 
 # Running script
 def RUN():
-        keyFile = "KEY.txt"
-        UrlFile = "Url.txt"
-        wanipFile = "WanIP.txt"
+        Jsonfile = "data.json"
         LogFolder = "log"
 
-        CheckFileExist(wanipFile)
-        CheckFileExist(keyFile)
-        CheckFileExist(UrlFile)
+        if not CheckFileExist(Jsonfile):
+                CreateJsonFile(Jsonfile)
+
         CheckFolderExist(LogFolder)
 
-        key = GetContent(keyFile)
-        url = GetContent(UrlFile)
+        key = GetJsonData(Jsonfile, 'apikey')
+        url = GetJsonData(Jsonfile, 'url')
         if not url == "":
                 if not key == "":
                         ip = GetWanIP()
 
                         if not ip == "NULL":
-                                if CheckWanIP(ip, wanipFile) == True:
+                                if CheckWanIP(ip, Jsonfile) == True:
                                         Log(APIPost(ip, url, key), LogFolder)
                                         Log("API CALL - WANIP: " + ip, LogFolder)
                                 else:

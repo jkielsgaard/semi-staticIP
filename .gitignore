@@ -1,8 +1,11 @@
 # Ignore folder named "log"
 log/
 
-# Ignore all .log files
-*.log
+# Ignore virtual environment folder
+.venv/
 
-# Ignore all .txt files
-*.txt
+# Ignore vscode folder
+.vscode/
+
+# Ignore all .json files
+*.json
