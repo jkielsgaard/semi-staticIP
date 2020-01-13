@@ -32,8 +32,8 @@ def CheckWanIP(ip, fil):
 
 # Json Workers
 def CreateJsonFile(fil): 
+        os.mknod(fil)
         data = { 'url': '', 'apikey': '', 'WanIP': '' }
-
         with open(fil, 'w') as outfile:
                 json.dump(data, outfile)
 
@@ -53,72 +53,46 @@ def UpdateWanIP(fil, ip):
 ###########################
 
 
-# Check of create folder and files
-def CheckFolderExist(folder): 
-        if os.path.isdir(folder):
-                return True
-        else:
-                return False
-
-def CreateFolder(folder):
-        os.mkdir(folder)
-
-def CheckFileExist(fil):
-        if os.path.isfile(fil):
-                return True
-        else:
-                return False
-
-def CreateFile(fil):
-        os.mknod(fil)
-###########################
-
 # Creates logs
-def Log(log, path):
-        path = "log"
+def Log(log):
         now  = datetime.now()
         date = now.strftime("%Y%m%d")
         time = now.strftime("%H:%M:%S")
-        
-        if not CheckFolderExist(path):
-                CreateFolder(path)
 
-        fil = path + "/" + date + ".log"
-        if not CheckFileExist(fil):
-                CreateFile(fil)
+
+        logFile = "/opt/autohomeip/log/" + date + ".log"
+        if not os.path.isfile(logFile):
+                os.mknod(logFile)
         
-        fa = open(fil, "a+")
+        fa = open(logFile, "a+")
         fa.write(time + " - " + log + "\r\n")
         fa.close
 ###########################
 
 # Running script
 def RUN():
-        Jsonfile = "data.json"
-        LogFolder = "log"
+        jsonFile = "/opt/autohomeip/config/data.json"
 
-        if not CheckFileExist(Jsonfile):
-                CreateJsonFile(Jsonfile)
+        if not os.path.isfile(jsonFile):
+                CreateJsonFile(jsonFile)
 
-        CheckFolderExist(LogFolder)
-
-        key = GetJsonData(Jsonfile, 'apikey')
-        url = GetJsonData(Jsonfile, 'url')
+        key = GetJsonData(jsonFile, 'apikey')
+        url = GetJsonData(jsonFile, 'url')
         if not url == "":
                 if not key == "":
                         ip = GetWanIP()
 
                         if not ip == "NULL":
-                                if CheckWanIP(ip, Jsonfile) == True:
-                                        Log(APIPost(ip, url, key), LogFolder)
-                                        Log("API CALL - WANIP: " + ip, LogFolder)
+                                if CheckWanIP(ip, jsonFile) == True:
+                                        Log(APIPost(ip, url, key))
+                                        Log("API CALL - WANIP: " + ip)
                                 else:
-                                        Log("NO CHANGE", LogFolder)
+                                        Log("NO CHANGE")
                         else: 
-                                Log("CONNECTIONS ERROR", LogFolder)
+                                Log("CONNECTIONS ERROR")
                 else:
-                        Log("APIKEY ERROR", LogFolder)
+                        Log("APIKEY ERROR")
         else:
-                Log("URL ERROR", LogFolder)
+                Log("URL ERROR")
 
 RUN()
